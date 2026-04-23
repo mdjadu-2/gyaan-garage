@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gyaan Garage — Nashik's Science Experience Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --black:#000408;
+  --navy:#020d1a;
+  --deep:#040f1f;
+  --neon-green:#00ff88;
+  --neon-cyan:#00e5ff;
+  --neon-yellow:#ffe600;
+  --neon-red:#ff2d55;
+  --neon-blue:#4d9fff;
+  --text:#c8d8e8;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--black);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:18px;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CUSTOM CURSOR */
+#cursor{
+  position:fixed;width:12px;height:12px;
+  background:var(--neon-cyan);
+  border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width 0.2s,height 0.2s,background 0.2s;
+  box-shadow:0 0 10px var(--neon-cyan),0 0 30px var(--neon-cyan);
+}
+#cursor-ring{
+  position:fixed;width:36px;height:36px;
+  border:1.5px solid var(--neon-cyan);
+  border-radius:50%;
+  pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:all 0.1s ease;
+  opacity:0.6;
+}
+
+/* CANVAS PARTICLES */
+#particle-canvas{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;
+  pointer-events:none;z-index:0;
+  opacity:0.4;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  z-index:100;
+  padding:1.2rem 3rem;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(to bottom,rgba(0,4,8,0.95),transparent);
+  backdrop-filter:blur(4px);
+}
+.logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:1.3rem;font-weight:900;
+  color:var(--neon-cyan);
+  letter-spacing:3px;
+  text-shadow:0 0 20px var(--neon-cyan);
+}
+.logo span{color:var(--neon-green);}
+nav a{
+  color:var(--text);text-decoration:none;
+  font-size:0.85rem;letter-spacing:2px;
+  text-transform:uppercase;
+  transition:color 0.3s;margin-left:2rem;
+}
+nav a:hover{color:var(--neon-cyan);}
+
+/* SECTIONS */
+section{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  padding:6rem 2rem;
+  overflow:hidden;
+}
+
+/* HERO */
+#hero{
+  text-align:center;
+  background:radial-gradient(ellipse at center,#020d1a 0%,#000408 70%);
+}
+.hero-eyebrow{
+  font-size:0.8rem;letter-spacing:6px;
+  text-transform:uppercase;
+  color:var(--neon-green);
+  margin-bottom:1.5rem;
+  opacity:0;animation:fadeUp 1s 0.3s forwards;
+}
+.hero-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(2.2rem,6vw,5rem);
+  font-weight:900;
+  line-height:1.1;
+  color:#fff;
+  margin-bottom:1.5rem;
+  opacity:0;animation:fadeUp 1s 0.6s forwards;
+}
+.hero-title .accent{
+  color:var(--neon-cyan);
+  text-shadow:0 0 40px var(--neon-cyan),0 0 80px rgba(0,229,255,0.3);
+}
+.hero-sub{
+  font-size:1.2rem;font-weight:300;
+  color:var(--text);max-width:600px;margin:0 auto 3rem;
+  opacity:0;animation:fadeUp 1s 0.9s forwards;
+  line-height:1.7;
+}
+.hero-sub strong{color:var(--neon-yellow);}
+.btn-glow{
+  display:inline-block;
+  padding:1rem 2.5rem;
+  background:transparent;
+  border:1.5px solid var(--neon-green);
+  color:var(--neon-green);
+  font-family:'Orbitron',sans-serif;
+  font-size:0.85rem;letter-spacing:3px;
+  text-transform:uppercase;
+  text-decoration:none;
+  cursor:none;
+  transition:all 0.3s;
+  position:relative;overflow:hidden;
+  opacity:0;animation:fadeUp 1s 1.2s forwards;
+}
+.btn-glow::before{
+  content:'';position:absolute;top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.2),transparent);
+  transition:left 0.5s;
+}
+.btn-glow:hover::before{left:100%;}
+.btn-glow:hover{
+  background:rgba(0,255,136,0.1);
+  box-shadow:0 0 30px rgba(0,255,136,0.4),0 0 60px rgba(0,255,136,0.2);
+}
+.scroll-hint{
+  position:absolute;bottom:2rem;
+  display:flex;flex-direction:column;align-items:center;gap:0.5rem;
+  font-size:0.7rem;letter-spacing:3px;color:rgba(200,216,232,0.4);
+  animation:bounce 2s infinite;
+}
+.scroll-hint::after{
+  content:'';width:1px;height:40px;
+  background:linear-gradient(to bottom,rgba(0,229,255,0.5),transparent);
+}
+
+/* SECTION TITLES */
+.section-label{
+  font-size:0.75rem;letter-spacing:6px;
+  text-transform:uppercase;color:var(--neon-cyan);
+  margin-bottom:1rem;
+}
+.section-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(1.8rem,4vw,3.2rem);
+  font-weight:700;color:#fff;
+  margin-bottom:1.5rem;text-align:center;
+  line-height:1.2;
+}
+.section-title .hi{color:var(--neon-yellow);}
+
+/* CHEMICAL REACTION SECTION */
+#chemical{
+  background:var(--navy);
+  text-align:center;
+}
+.chem-desc{
+  max-width:550px;margin:0 auto 3rem;
+  font-size:1.1rem;line-height:1.8;color:var(--text);
+}
+#beaker-wrap{
+  position:relative;width:200px;height:280px;margin:0 auto 2rem;cursor:none;
+}
+#beaker-svg{width:100%;height:100%;}
+.chem-instruction{
+  font-size:0.85rem;letter-spacing:2px;
+  color:var(--neon-green);margin-top:1rem;
+  animation:pulse 2s infinite;
+}
+#chem-boom{
+  display:none;
+  font-family:'Orbitron',sans-serif;
+  font-size:1.5rem;color:var(--neon-yellow);
+  margin-top:1.5rem;
+  text-shadow:0 0 30px var(--neon-yellow);
+  animation:popIn 0.5s forwards;
+}
+
+/* ZONES */
+#zones{
+  background:var(--black);
+}
+.zones-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1.5rem;width:100%;max-width:1100px;
+  margin-top:3rem;
+}
+.zone-card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:4px;
+  padding:2rem 1.5rem;
+  position:relative;overflow:hidden;
+  transition:transform 0.3s,box-shadow 0.3s;
+  opacity:0;transform:translateY(40px);
+}
+.zone-card.visible{
+  animation:cardReveal 0.7s forwards;
+}
+.zone-card:hover{transform:translateY(-6px);}
+.zone-card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:2px;
+}
+.zone-card.z1::before{background:var(--neon-yellow);box-shadow:0 0 20px var(--neon-yellow);}
+.zone-card.z2::before{background:var(--neon-green);box-shadow:0 0 20px var(--neon-green);}
+.zone-card.z3::before{background:var(--neon-cyan);box-shadow:0 0 20px var(--neon-cyan);}
+.zone-card.z4::before{background:var(--neon-red);box-shadow:0 0 20px var(--neon-red);}
+.zone-card:hover.z1{box-shadow:0 10px 40px rgba(255,230,0,0.15);}
+.zone-card:hover.z2{box-shadow:0 10px 40px rgba(0,255,136,0.15);}
+.zone-card:hover.z3{box-shadow:0 10px 40px rgba(0,229,255,0.15);}
+.zone-card:hover.z4{box-shadow:0 10px 40px rgba(255,45,85,0.15);}
+.zone-num{
+  font-family:'Orbitron',sans-serif;
+  font-size:0.7rem;letter-spacing:3px;
+  margin-bottom:0.8rem;opacity:0.5;
+}
+.zone-name{
+  font-family:'Orbitron',sans-serif;
+  font-size:1.1rem;font-weight:700;
+  color:#fff;margin-bottom:0.8rem;line-height:1.3;
+}
+.zone-card.z1 .zone-name{color:var(--neon-yellow);}
+.zone-card.z2 .zone-name{color:var(--neon-green);}
+.zone-card.z3 .zone-name{color:var(--neon-cyan);}
+.zone-card.z4 .zone-name{color:var(--neon-red);}
+.zone-desc{font-size:0.95rem;line-height:1.7;color:rgba(200,216,232,0.7);}
+.zone-icon{font-size:2rem;margin-bottom:1rem;}
+
+/* MEDIA PLACEHOLDER - uncomment and replace with real images/videos */
+/*
+.zone-media{
+  margin-top:1rem;border-radius:4px;overflow:hidden;
+  border:1px solid rgba(255,255,255,0.1);
+}
+.zone-media img{width:100%;height:160px;object-fit:cover;}
+.zone-media video{width:100%;height:160px;object-fit:cover;}
+*/
+
+/* ELECTRODE SECTION */
+#electrode{
+  background:var(--navy);
+  text-align:center;
+}
+.electrode-desc{
+  max-width:550px;margin:0 auto 3rem;
+  font-size:1.1rem;line-height:1.8;
+}
+.electrode-arena{
+  width:100%;max-width:600px;
+  height:200px;position:relative;
+  margin:0 auto 2rem;cursor:none;
+}
+.electrode{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:60px;height:120px;
+  background:linear-gradient(to bottom,#1a2a3a,#0d1f2d);
+  border:1px solid rgba(77,159,255,0.4);
+  border-radius:4px;
+  display:flex;align-items:flex-start;justify-content:center;
+  padding-top:8px;
+}
+.electrode::after{
+  content:'';width:8px;height:30px;
+  background:var(--neon-blue);
+  border-radius:2px;
+  box-shadow:0 0 10px var(--neon-blue);
+}
+.el-left{left:60px;}
+.el-right{right:60px;}
+#spark-canvas{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;pointer-events:none;
+}
+.charge-bar-wrap{
+  width:100%;max-width:400px;margin:0 auto 1rem;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(77,159,255,0.2);
+  border-radius:2px;height:8px;overflow:hidden;
+}
+#charge-bar{
+  height:100%;width:0%;
+  background:linear-gradient(to right,var(--neon-blue),var(--neon-cyan));
+  transition:width 0.1s;
+  box-shadow:0 0 10px var(--neon-cyan);
+}
+#click-count{
+  font-family:'Orbitron',sans-serif;
+  font-size:0.8rem;letter-spacing:2px;
+  color:var(--neon-blue);margin-bottom:0.5rem;
+}
+.click-instruction{
+  font-size:0.85rem;letter-spacing:2px;
+  color:var(--neon-cyan);
+  animation:pulse 2s infinite;
+}
+#electrode-boom{
+  display:none;
+  font-family:'Orbitron',sans-serif;
+  font-size:1.1rem;color:#fff;
+  max-width:600px;margin:1.5rem auto 0;
+  line-height:1.6;
+  text-align:center;
+}
+#electrode-boom strong{
+  color:var(--neon-cyan);
+  text-shadow:0 0 20px var(--neon-cyan);
+}
+
+/* TIMELINE */
+#timeline{
+  background:var(--black);
+}
+.timeline-wrap{
+  width:100%;max-width:800px;
+  margin-top:3rem;position:relative;
+}
+.timeline-wrap::before{
+  content:'';position:absolute;
+  left:50%;top:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,transparent,var(--neon-cyan),transparent);
+  transform:translateX(-50%);
+}
+.t-item{
+  display:flex;align-items:center;
+  margin-bottom:3rem;
+  opacity:0;transform:translateX(-30px);
+  transition:all 0.6s;
+}
+.t-item:nth-child(even){
+  flex-direction:row-reverse;
+  transform:translateX(30px);
+}
+.t-item.visible{opacity:1;transform:translateX(0);}
+.t-content{
+  width:calc(50% - 40px);
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(0,229,255,0.15);
+  border-radius:4px;padding:1.2rem 1.5rem;
+}
+.t-time{
+  font-family:'Orbitron',sans-serif;
+  font-size:0.75rem;letter-spacing:2px;
+  color:var(--neon-cyan);margin-bottom:0.4rem;
+}
+.t-title{
+  font-size:1.1rem;font-weight:600;
+  color:#fff;margin-bottom:0.4rem;
+}
+.t-desc{font-size:0.9rem;color:rgba(200,216,232,0.6);line-height:1.6;}
+.t-dot{
+  width:14px;height:14px;
+  background:var(--neon-cyan);
+  border-radius:50%;flex-shrink:0;
+  margin:0 33px;
+  box-shadow:0 0 15px var(--neon-cyan);
+}
+
+/* MEDIA SECTION PLACEHOLDER */
+/*
+#media-section{
+  background:var(--navy);
+  text-align:center;
+}
+.media-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;width:100%;max-width:1000px;margin-top:2rem;
+}
+.media-item{
+  border-radius:4px;overflow:hidden;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.media-item img{width:100%;height:200px;object-fit:cover;}
+.media-item video{width:100%;height:200px;object-fit:cover;}
+*/
+
+/* FINAL BOOM */
+#finale{
+  background:var(--deep);
+  text-align:center;overflow:hidden;
+}
+#finale-canvas{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;pointer-events:none;
+}
+.finale-content{position:relative;z-index:2;}
+.finale-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(2rem,5vw,4rem);
+  font-weight:900;color:#fff;
+  line-height:1.2;margin-bottom:1rem;
+}
+.finale-title .boom{
+  color:var(--neon-green);
+  text-shadow:0 0 40px var(--neon-green),0 0 80px rgba(0,255,136,0.3);
+  display:block;
+}
+.finale-sub{
+  font-size:1.1rem;color:var(--text);
+  max-width:500px;margin:0 auto 3rem;line-height:1.7;
+}
+.finale-free{
+  display:inline-block;
+  background:rgba(0,255,136,0.1);
+  border:1px solid var(--neon-green);
+  padding:0.4rem 1.2rem;
+  border-radius:2px;
+  font-size:0.85rem;letter-spacing:2px;
+  color:var(--neon-green);
+  margin-bottom:2rem;
+}
+.btn-boom{
+  display:inline-block;
+  padding:1.2rem 3rem;
+  background:var(--neon-green);
+  color:#000;
+  font-family:'Orbitron',sans-serif;
+  font-size:0.9rem;letter-spacing:3px;
+  text-transform:uppercase;
+  text-decoration:none;
+  font-weight:700;
+  cursor:none;
+  transition:all 0.3s;
+  position:relative;overflow:hidden;
+}
+.btn-boom:hover{
+  box-shadow:0 0 40px rgba(0,255,136,0.6),0 0 80px rgba(0,255,136,0.3);
+  transform:scale(1.05);
+}
+
+/* FOOTER */
+footer{
+  background:var(--black);
+  border-top:1px solid rgba(255,255,255,0.05);
+  padding:2rem 3rem;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:1rem;
+  position:relative;z-index:1;
+}
+.footer-logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:1rem;color:var(--neon-cyan);letter-spacing:3px;
+}
+.footer-logo span{color:var(--neon-green);}
+.footer-text{font-size:0.8rem;color:rgba(200,216,232,0.3);letter-spacing:1px;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes bounce{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
+}
+@keyframes pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:0.4;}
+}
+@keyframes cardReveal{
+  from{opacity:0;transform:translateY(40px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes popIn{
+  from{opacity:0;transform:scale(0.5);}
+  to{opacity:1;transform:scale(1);}
+}
+@keyframes flash{
+  0%,100%{opacity:0;}
+  50%{opacity:1;}
+}
+
+/* REVEAL */
+.reveal{
+  opacity:0;transform:translateY(40px);
+  transition:opacity 0.8s,transform 0.8s;
+}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;}
+  nav a{display:none;}
+  .timeline-wrap::before{left:20px;}
+  .t-item,.t-item:nth-child(even){flex-direction:column;align-items:flex-start;transform:translateX(0);opacity:0;}
+  .t-content{width:calc(100% - 60px);margin-left:60px;}
+  .t-dot{margin:0 0 0 13px;position:absolute;}
+  .t-item{position:relative;padding-left:0;}
+  footer{flex-direction:column;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="particle-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">GYAAN<span>GARAGE</span></div>
+  <div>
+    <a href="#zones">Zones</a>
+    <a href="#timeline">Sessions</a>
+    <a href="https://gyaan-garage.paperform.co" target="_blank">Register Free</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-eyebrow">Nashik · Std 6 to 10 · Ages 11–16</div>
+  <h1 class="hero-title">Science Is Not<br>A Subject.<br><span class="accent">It's An Experience.</span></h1>
+  <p class="hero-sub">Gyaan Garage is Nashik's first hands-on science activity centre. <strong>No lectures. No textbooks.</strong> Just real experiments, real builds, and real challenges — every weekend.</p>
+  <a href="https://gyaan-garage.paperform.co" target="_blank" class="btn-glow">Claim Your Free Session →</a>
+  <div class="scroll-hint">SCROLL DOWN</div>
+</section>
+
+<!-- CHEMICAL REACTION -->
+<section id="chemical">
+  <div class="section-label reveal">— Experiment 01 —</div>
+  <h2 class="section-title reveal">Move Your Cursor.<br><span class="hi">Watch What Happens.</span></h2>
+  <p class="chem-desc reveal">This is what we do at Gyaan Garage — we make science react to you. Click the beaker to trigger a reaction.</p>
+
+  <div id="beaker-wrap">
+    <svg id="beaker-svg" viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+      <!-- Beaker body -->
+      <path d="M60 40 L60 180 Q60 240 100 240 Q140 240 140 180 L140 40 Z" fill="rgba(0,20,40,0.8)" stroke="rgba(0,229,255,0.4)" stroke-width="2"/>
+      <!-- Beaker neck -->
+      <rect x="55" y="20" width="90" height="25" rx="4" fill="rgba(0,20,40,0.9)" stroke="rgba(0,229,255,0.4)" stroke-width="2"/>
+      <!-- Liquid -->
+      <clipPath id="beaker-clip">
+        <path d="M62 80 L62 180 Q62 235 100 235 Q138 235 138 180 L138 80 Z"/>
+      </clipPath>
+      <rect id="liquid" x="62" y="80" width="76" height="160" fill="#00e5ff" opacity="0.6" clip-path="url(#beaker-clip)"/>
+      <!-- Bubbles -->
+      <circle id="b1" cx="80" cy="200" r="5" fill="none" stroke="rgba(0,255,136,0.8)" stroke-width="1.5" opacity="0"/>
+      <circle id="b2" cx="100" cy="220" r="4" fill="none" stroke="rgba(0,255,136,0.8)" stroke-width="1.5" opacity="0"/>
+      <circle id="b3" cx="120" cy="190" r="6" fill="none" stroke="rgba(0,255,136,0.8)" stroke-width="1.5" opacity="0"/>
+      <!-- Measurement lines -->
+      <line x1="62" y1="120" x2="72" y2="120" stroke="rgba(0,229,255,0.4)" stroke-width="1"/>
+      <line x1="62" y1="150" x2="72" y2="150" stroke="rgba(0,229,255,0.4)" stroke-width="1"/>
+      <line x1="62" y1="180" x2="72" y2="180" stroke="rgba(0,229,255,0.4)" stroke-width="1"/>
+    </svg>
+  </div>
+  <p class="chem-instruction">⟨ CLICK THE BEAKER ⟩</p>
+  <div id="chem-boom">💥 This is what we do. Every. Single. Session.</div>
+</section>
+
+<!-- 4 ZONES -->
+<section id="zones">
+  <div class="section-label reveal">— The 4 Zones —</div>
+  <h2 class="section-title reveal">One Session.<br><span class="hi">Four Worlds.</span></h2>
+  <p class="reveal" style="max-width:600px;text-align:center;line-height:1.8;color:rgba(200,216,232,0.7);">Every Gyaan Garage session takes students through 4 uniquely designed zones. Each one is a completely different science experience.</p>
+
+  <div class="zones-grid">
+    <div class="zone-card z1">
+      <div class="zone-icon">⚡</div>
+      <div class="zone-num">ZONE 01</div>
+      <div class="zone-name">The Wow Room</div>
+      <div class="zone-desc">Instructor-led spectacle experiments that make your jaw drop. This is science as theatre — dramatic, loud, and unforgettable.</div>
+      <!-- MEDIA PLACEHOLDER: Add real photos/videos from pilot here
+      <div class="zone-media">
+        <img src="YOUR_PHOTO_HERE.jpg" alt="Wow Room experiment"/>
+      </div>
+      -->
+    </div>
+    <div class="zone-card z2">
+      <div class="zone-icon">🔧</div>
+      <div class="zone-num">ZONE 02</div>
+      <div class="zone-name">The Build Lab</div>
+      <div class="zone-desc">Students build something real — a telescope, periscope, pinhole camera — and take it home. Every student leaves with proof they made something.</div>
+      <!-- MEDIA PLACEHOLDER: Add real photos/videos from pilot here
+      <div class="zone-media">
+        <img src="YOUR_PHOTO_HERE.jpg" alt="Build Lab projects"/>
+      </div>
+      -->
+    </div>
+    <div class="zone-card z3">
+      <div class="zone-icon">🏆</div>
+      <div class="zone-num">ZONE 03</div>
+      <div class="zone-name">The Challenge Floor</div>
+      <div class="zone-desc">Science as competition. Teams battle it out on timed challenges. The floor is loud, fast, and full of winning moments.</div>
+      <!-- MEDIA PLACEHOLDER: Add real photos/videos from pilot here
+      <div class="zone-media">
+        <img src="YOUR_PHOTO_HERE.jpg" alt="Challenge Floor competition"/>
+      </div>
+      -->
+    </div>
+    <div class="zone-card z4">
+      <div class="zone-icon">🔍</div>
+      <div class="zone-num">ZONE 04</div>
+      <div class="zone-name">The Mystery Room</div>
+      <div class="zone-desc">One student. One problem. Zero instructions. This is the hardest zone — and the one students talk about the most. Figure it out yourself.</div>
+      <!-- MEDIA PLACEHOLDER: Add real photos/videos from pilot here
+      <div class="zone-media">
+        <img src="YOUR_PHOTO_HERE.jpg" alt="Mystery Room challenge"/>
+      </div>
+      -->
+    </div>
+  </div>
+</section>
+
+<!-- ELECTRODE -->
+<section id="electrode">
+  <div class="section-label reveal">— Experiment 02 —</div>
+  <h2 class="section-title reveal">Feel The Charge.<br><span class="hi">Click To Build It.</span></h2>
+  <p class="electrode-desc reveal">Every click charges the electrode. Keep clicking until something happens.</p>
+
+  <div class="electrode-arena">
+    <canvas id="spark-canvas"></canvas>
+    <div class="electrode el-left"></div>
+    <div class="electrode el-right"></div>
+  </div>
+
+  <div id="click-count">0 / 20 CLICKS</div>
+  <div class="charge-bar-wrap">
+    <div id="charge-bar"></div>
+  </div>
+  <p class="click-instruction">⟨ CLICK ANYWHERE ON THIS SECTION ⟩</p>
+  <div id="electrode-boom">
+    <strong>That curiosity you just felt?</strong><br>
+    We bottle it for 2.5 hours every weekend at Gyaan Garage.
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <div class="section-label reveal">— A Session —</div>
+  <h2 class="section-title reveal">2.5 Hours.<br><span class="hi">One Complete Journey.</span></h2>
+
+  <div class="timeline-wrap">
+    <div class="t-item">
+      <div class="t-content">
+        <div class="t-time">0:00 — 0:20</div>
+        <div class="t-title">The Wow Room</div>
+        <div class="t-desc">Session kicks off with a bang. Instructor-led spectacle experiment. Students watch, react, and ask why.</div>
+      </div>
+      <div class="t-dot"></div>
+    </div>
+    <div class="t-item">
+      <div class="t-content">
+        <div class="t-time">0:20 — 1:00</div>
+        <div class="t-title">The Build Lab</div>
+        <div class="t-desc">Hands get busy. Students receive materials and instructions to build a real science project from scratch.</div>
+      </div>
+      <div class="t-dot"></div>
+    </div>
+    <div class="t-item">
+      <div class="t-content">
+        <div class="t-time">1:00 — 1:45</div>
+        <div class="t-title">The Challenge Floor</div>
+        <div class="t-desc">Teams compete in timed science challenges. Fast, loud, energetic. Pure applied science thinking.</div>
+      </div>
+      <div class="t-dot"></div>
+    </div>
+    <div class="t-item">
+      <div class="t-content">
+        <div class="t-time">1:45 — 2:30</div>
+        <div class="t-title">The Mystery Room</div>
+        <div class="t-desc">The final test. One student, one problem, zero help. The hardest 45 minutes — and the most rewarding.</div>
+      </div>
+      <div class="t-dot"></div>
+    </div>
+  </div>
+</section>
+
+<!-- PILOT MEDIA SECTION - Uncomment when you have photos/videos -->
+<!--
+<section id="media-section">
+  <div class="section-label reveal">— From The Lab —</div>
+  <h2 class="section-title reveal">See It <span class="hi">In Action.</span></h2>
+  <div class="media-grid">
+    <div class="media-item">
+      <img src="YOUR_PILOT_PHOTO_1.jpg" alt="Students building projects"/>
+    </div>
+    <div class="media-item">
+      <img src="YOUR_PILOT_PHOTO_2.jpg" alt="Elephant toothpaste experiment"/>
+    </div>
+    <div class="media-item">
+      <video autoplay muted loop playsinline>
+        <source src="YOUR_PILOT_VIDEO.mp4" type="video/mp4"/>
+      </video>
+    </div>
+  </div>
+</section>
+-->
+
+<!-- FINALE -->
+<section id="finale">
+  <canvas id="finale-canvas"></canvas>
+  <div class="finale-content">
+    <div class="finale-free reveal">✦ FIRST SESSION FREE ✦</div>
+    <h2 class="finale-title reveal">
+      Ready To Explode
+      <span class="boom">Some Curiosity?</span>
+    </h2>
+    <p class="finale-sub reveal">Weekend sessions in Nashik for students of Std 6 to 10. Register your interest — we'll reach out personally on WhatsApp to confirm your free session.</p>
+    <a href="https://gyaan-garage.paperform.co" target="_blank" class="btn-boom reveal">Register For Your Free Session →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">GYAAN<span>GARAGE</span></div>
+  <div class="footer-text">Nashik, Maharashtra · Std 6–10 · Ages 11–16</div>
+  <div class="footer-text">© 2025 Gyaan Garage</div>
+</footer>
+
+<script>
+// CURSOR
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}animRing();
+
+// BACKGROUND PARTICLES
+const pc=document.getElementById('particle-canvas');
+const pctx=pc.getContext('2d');
+pc.width=window.innerWidth;pc.height=window.innerHeight;
+window.addEventListener('resize',()=>{pc.width=window.innerWidth;pc.height=window.innerHeight;});
+const particles=[];
+for(let i=0;i<80;i++){
+  particles.push({
+    x:Math.random()*pc.width,
+    y:Math.random()*pc.height,
+    vx:(Math.random()-0.5)*0.3,
+    vy:(Math.random()-0.5)*0.3,
+    r:Math.random()*1.5+0.5,
+    o:Math.random()*0.5+0.1
+  });
+}
+function drawParticles(){
+  pctx.clearRect(0,0,pc.width,pc.height);
+  particles.forEach(p=>{
+    p.x+=p.vx+(mx/pc.width-0.5)*0.3;
+    p.y+=p.vy+(my/pc.height-0.5)*0.3;
+    if(p.x<0)p.x=pc.width;if(p.x>pc.width)p.x=0;
+    if(p.y<0)p.y=pc.height;if(p.y>pc.height)p.y=0;
+    pctx.beginPath();
+    pctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    pctx.fillStyle=`rgba(0,229,255,${p.o})`;
+    pctx.fill();
+  });
+  // draw connecting lines
+  particles.forEach((a,i)=>{
+    particles.slice(i+1).forEach(b=>{
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<120){
+        pctx.beginPath();
+        pctx.moveTo(a.x,a.y);pctx.lineTo(b.x,b.y);
+        pctx.strokeStyle=`rgba(0,229,255,${0.08*(1-d/120)})`;
+        pctx.lineWidth=0.5;pctx.stroke();
+      }
+    });
+  });
+  requestAnimationFrame(drawParticles);
+}drawParticles();
+
+// SCROLL REVEAL
+const revealEls=document.querySelectorAll('.reveal,.zone-card,.t-item');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+    }
+  });
+},{threshold:0.15});
+revealEls.forEach(el=>obs.observe(el));
+
+// Zone card stagger
+document.querySelectorAll('.zone-card').forEach((c,i)=>{
+  c.style.animationDelay=(i*0.15)+'s';
+});
+
+// CHEMICAL BEAKER
+const beaker=document.getElementById('beaker-wrap');
+const liquid=document.getElementById('liquid');
+const chemBoom=document.getElementById('chem-boom');
+const b1=document.getElementById('b1'),b2=document.getElementById('b2'),b3=document.getElementById('b3');
+let chemClicked=false;
+const colors=['#00e5ff','#00ff88','#ffe600','#ff2d55','#ff6b00'];
+let colorIdx=0;
+
+beaker.addEventListener('mousemove',e=>{
+  const rect=beaker.getBoundingClientRect();
+  const x=(e.clientX-rect.left)/rect.width;
+  const y=(e.clientY-rect.top)/rect.height;
+  liquid.setAttribute('opacity',0.4+y*0.4);
+  colorIdx=(colorIdx+0.05)%colors.length;
+});
+
+beaker.addEventListener('click',()=>{
+  if(chemClicked)return;
+  chemClicked=true;
+  let c=0;
+  const cycle=setInterval(()=>{
+    liquid.setAttribute('fill',colors[c%colors.length]);
+    [b1,b2,b3].forEach((b,i)=>{
+      b.setAttribute('opacity','1');
+      b.setAttribute('cy',parseInt(b.getAttribute('cy'))-5);
+    });
+    c++;
+    if(c>10){
+      clearInterval(cycle);
+      liquid.setAttribute('fill','#ff6b00');
+      liquid.setAttribute('opacity','0.9');
+      chemBoom.style.display='block';
+    }
+  },80);
+});
+
+// ELECTRODE / SPARK
+const sparkCanvas=document.getElementById('spark-canvas');
+const sctx=sparkCanvas.getContext('2d');
+const electrodeSection=document.getElementById('electrode');
+const chargeBar=document.getElementById('charge-bar');
+const clickCount=document.getElementById('click-count');
+const electrodeBoom=document.getElementById('electrode-boom');
+let clicks=0,maxClicks=20,sparked=false;
+
+function resizeSpark(){
+  const r=sparkCanvas.parentElement.getBoundingClientRect();
+  sparkCanvas.width=r.width;sparkCanvas.height=r.height;
+}
+resizeSpark();window.addEventListener('resize',resizeSpark);
+
+function drawSpark(intensity){
+  sctx.clearRect(0,0,sparkCanvas.width,sparkCanvas.height);
+  if(intensity<=0)return;
+  const cx=sparkCanvas.width/2;
+  const cy=sparkCanvas.height/2;
+  const lx=60+60/2;
+  const rx=sparkCanvas.width-60-60/2;
+  const segments=8+Math.floor(intensity*6);
+  sctx.beginPath();
+  sctx.moveTo(lx,cy);
+  let px=lx;
+  for(let i=1;i<=segments;i++){
+    const nx=lx+(rx-lx)*(i/segments);
+    const ny=cy+(Math.random()-0.5)*40*intensity;
+    sctx.lineTo(nx,ny);
+    px=nx;
+  }
+  sctx.lineTo(rx,cy);
+  sctx.strokeStyle=`rgba(77,159,255,${0.4+intensity*0.6})`;
+  sctx.lineWidth=1.5+intensity*2;
+  sctx.shadowColor='#00e5ff';
+  sctx.shadowBlur=10+intensity*20;
+  sctx.stroke();
+  sctx.shadowBlur=0;
+}
+
+electrodeSection.addEventListener('click',()=>{
+  if(sparked)return;
+  clicks=Math.min(clicks+1,maxClicks);
+  const pct=clicks/maxClicks;
+  chargeBar.style.width=(pct*100)+'%';
+  clickCount.textContent=clicks+' / '+maxClicks+' CLICKS';
+  drawSpark(pct);
+  if(clicks>=maxClicks){
+    sparked=true;
+    // Big lightning flash
+    let f=0;
+    const flash=setInterval(()=>{
+      drawSpark(1+Math.random()*0.5);
+      f++;
+      if(f>15){
+        clearInterval(flash);
+        sctx.clearRect(0,0,sparkCanvas.width,sparkCanvas.height);
+        electrodeBoom.style.display='block';
+        electrodeBoom.style.animation='fadeUp 0.8s forwards';
+      }
+    },60);
+  }
+});
+
+// Ambient spark animation when scrolled into view
+const elObs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting&&!sparked){
+    let t=0;
+    const amb=setInterval(()=>{
+      if(sparked){clearInterval(amb);return;}
+      drawSpark(0.1+Math.sin(t*0.1)*0.05);
+      t++;
+    },100);
+  }
+},{threshold:0.3});
+elObs.observe(electrodeSection);
+
+// FINALE PARTICLES
+const fc=document.getElementById('finale-canvas');
+const fctx=fc.getContext('2d');
+function resizeFinale(){
+  const r=fc.parentElement.getBoundingClientRect();
+  fc.width=r.width;fc.height=r.height;
+}
+resizeFinale();window.addEventListener('resize',resizeFinale);
+const fparts=[];
+const finaleObs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting){launchFinale();}
+},{threshold:0.3});
+finaleObs.observe(document.getElementById('finale'));
+
+function launchFinale(){
+  fparts.length=0;
+  for(let i=0;i<120;i++){
+    const angle=Math.random()*Math.PI*2;
+    const speed=Math.random()*6+2;
+    fparts.push({
+      x:fc.width/2,y:fc.height/2,
+      vx:Math.cos(angle)*speed,
+      vy:Math.sin(angle)*speed,
+      r:Math.random()*4+1,
+      color:['#00ff88','#00e5ff','#ffe600','#ff2d55','#4d9fff'][Math.floor(Math.random()*5)],
+      life:1,decay:Math.random()*0.02+0.01
+    });
+  }
+  animFinale();
+}
+function animFinale(){
+  fctx.clearRect(0,0,fc.width,fc.height);
+  let alive=false;
+  fparts.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.1;p.life-=p.decay;
+    if(p.life>0){
+      alive=true;
+      fctx.beginPath();
+      fctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);
+      fctx.fillStyle=p.color;
+      fctx.globalAlpha=p.life;
+      fctx.fill();
+      fctx.globalAlpha=1;
+    }
+  });
+  if(alive)requestAnimationFrame(animFinale);
+}
+</script>
+</body>
+</html>
